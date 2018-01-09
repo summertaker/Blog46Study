@@ -67,6 +67,7 @@ public class MainAdapter extends BaseDataAdapter {
             holder.tvTitle = view.findViewById(R.id.tvTitle);
             holder.tvDate = view.findViewById(R.id.tvDate);
             holder.tvContent = view.findViewById(R.id.tvContent);
+            //mContext.registerForContextMenu(holder.tvContent);
             view.setTag(holder);
         } else {
             holder = (ViewHolder) view.getTag();

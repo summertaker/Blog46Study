@@ -28,7 +28,7 @@ public class GroupActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.group_activity);
 
-        mContext = GroupActivity.this;
+        mContext = getApplicationContext(); //GroupActivity.this;
 
         //Intent intent = getIntent();
         //mGroupId = intent.getStringExtra("groupId");

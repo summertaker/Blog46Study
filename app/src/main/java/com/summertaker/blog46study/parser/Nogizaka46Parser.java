@@ -69,12 +69,22 @@ public class Nogizaka46Parser extends BaseParser {
                 }
             }
 
+            id = id.replace("eto", "etou");
+            id = id.replace("ito", "itou");
+            id = id.replace("itouu", "itou");
+            id = id.replace("jo", "jou");
+            //Log.e(mTag, id);
+
             thumbnailUrl = "http://img.nogizaka46.com/www/member/img/" + id + "_prof.jpg";
             pictureUrl = thumbnailUrl;
 
             name = a.select(".kanji").text();
 
-            Log.e(mTag, name + " / " + id);
+            if (name.contains("期生")) {
+                continue;
+            }
+
+            //Log.e(mTag, name + " / " + id);
 
             Member member = new Member();
             member.setGroupId(group.getId());
@@ -102,6 +112,8 @@ public class Nogizaka46Parser extends BaseParser {
         if (root == null) {
             return;
         }
+
+        //int count = 0;
 
         for (Element row : root.select("h1")) {
             String title = "";
@@ -192,7 +204,7 @@ public class Nogizaka46Parser extends BaseParser {
             date = dateArray[0].trim();
             date = Util.convertBlogDate(date);
 
-            Log.e(mTag, title + " / " + date + "\n" + content);
+            //Log.e(mTag, title + " / " + date + "\n" + content);
 
             Article article = new Article();
             article.setTitle(title);
@@ -200,6 +212,12 @@ public class Nogizaka46Parser extends BaseParser {
             article.setContent(content);
 
             articles.add(article);
+
+            //count++;
+
+            //if (count >= 1) {
+            //    break;
+            //}
         }
     }
 }

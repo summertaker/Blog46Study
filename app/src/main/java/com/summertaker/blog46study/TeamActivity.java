@@ -52,7 +52,7 @@ public class TeamActivity extends BaseActivity implements TeamInterface {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.team_activity);
 
-        mContext = TeamActivity.this;
+        mContext = getApplicationContext(); //TeamActivity.this;
 
         Intent intent = getIntent();
         String groupId = intent.getStringExtra("groupId");

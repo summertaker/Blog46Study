@@ -49,7 +49,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
 
-        mContext = MainActivity.this;
+        mContext = getApplicationContext(); //MainActivity.this;
 
         mToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);

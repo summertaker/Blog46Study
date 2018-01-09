@@ -72,7 +72,11 @@ public class Keyakizaka46Parser extends BaseParser {
 
             name = a.select("p.name").text();
 
-            //Log.e(mTag, teamName + " / " + name);
+            if (name.contains("期生")) {
+                continue;
+            }
+
+            Log.e(mTag, name);
 
             Member member = new Member();
             member.setGroupId(group.getId());
@@ -116,7 +120,7 @@ public class Keyakizaka46Parser extends BaseParser {
             return;
         }
 
-        int i = 0;
+        //int count = 0;
 
         for (Element row : root.select("article")) {
             String title = "";
@@ -158,7 +162,7 @@ public class Keyakizaka46Parser extends BaseParser {
 
             StringBuilder builder =  new StringBuilder();
             String[] array = content.split("<br>");
-            int count = 0;
+            int lineCount = 0;
             for (String str : array) {
                 Element con = Jsoup.parse(str);
                 Element img = con.select("img").first();
@@ -172,10 +176,10 @@ public class Keyakizaka46Parser extends BaseParser {
                     }
                 }
 
-                text = (count == 0) ? text : "<br><br>" + text;
+                text = (lineCount == 0) ? text : "<br><br>" + text;
                 builder.append(text);
 
-                count++;
+                lineCount++;
             }
 
             content = builder.toString();
@@ -219,6 +223,12 @@ public class Keyakizaka46Parser extends BaseParser {
             article.setContent(content);
 
             articles.add(article);
+
+            //count++;
+
+            //if (count >= 1) {
+            //    break;
+            //}
         }
     }
 }
