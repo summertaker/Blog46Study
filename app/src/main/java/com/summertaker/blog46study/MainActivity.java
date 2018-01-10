@@ -1,7 +1,6 @@
 package com.summertaker.blog46study;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -35,14 +34,13 @@ import java.util.Collections;
 public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener, MainFragment.Callback {
 
     private static final int REQUEST_PERMISSION_CODE = 100;
+    private boolean mIsPermissionGranted = false;
 
-    private Toolbar mToolbar;
+    private ArrayList<Member> mOshiMembers = new ArrayList<>();
 
     private SlidingTabLayout mSlidingTabLayout;
     private ViewPager mViewPager;
     private SectionsPagerAdapter mPagerAdapter;
-    private ArrayList<Team> mTeams = new ArrayList<>();
-    private ArrayList<Member> mOshiMembers = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,10 +49,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
         mContext = getApplicationContext(); //MainActivity.this;
 
-        mToolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(mToolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
-        mToolbar.setOnClickListener(new View.OnClickListener() {
+        toolbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 runFragment("goTop");
@@ -62,7 +60,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         });
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
 
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
@@ -96,13 +94,14 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        //Log.e(mTag, ">> onRequestPermissionsResult()...");
+
         switch (requestCode) {
             case REQUEST_PERMISSION_CODE: {
-                // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    start();
+                    mIsPermissionGranted = true;
+                    init();
                 } else {
-                    // permission denied
                     onPermissionDenied();
                 }
             }
@@ -124,69 +123,38 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         builder.show();
     }
 
-    void start() {
-        //mOshiMembers = BaseApplication.getInstance().loadMember(Config.PREFERENCE_KEY_OSHIMEMBERS);
-        //BaseApplication.getInstance().setmOshimembers(mOshiMembers);
-
-        if (mPagerAdapter == null) {
-            init();
-        }
-    }
-
     @Override
     public void onResume() {
-        //Log.e(mTag, ">>>>> onResume()...");
+        //Log.e(mTag, ">> onResume()...");
         super.onResume();
 
-        if (mPagerAdapter == null) {
+        if (mIsPermissionGranted) {
             init();
-        } else {
-            Collections.shuffle(mOshiMembers);
-            mPagerAdapter.notifyDataSetChanged();
         }
     }
 
     private void init() {
-        //mOshiMembers = BaseApplication.getInstance().getOshimembers();
+        if (mPagerAdapter == null) {
+            //Log.e(mTag, ">> init().mPagerAdapter is null...");
 
-        mOshiMembers = BaseApplication.getInstance().loadMember(Config.PREFERENCE_KEY_OSHIMEMBERS);
-        Collections.shuffle(mOshiMembers);
-        BaseApplication.getInstance().setmOshimembers(mOshiMembers);
+            mOshiMembers = BaseApplication.getInstance().loadMember(Config.PREFERENCE_KEY_OSHIMEMBERS);
 
-        mPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+            Collections.shuffle(mOshiMembers);
+            BaseApplication.getInstance().setmOshimembers(mOshiMembers); // Fragment 에서 불러와서 사용하므로 설정해 줄 것
 
-        mViewPager.setAdapter(mPagerAdapter);
-        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-            }
+            mPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+            mViewPager.setAdapter(mPagerAdapter);
 
-            @Override
-            public void onPageSelected(int position) {
-                //mBaseToolbar.setTitle(mTitle + " (" + (position + 1) + "/" + mMemberList.size() + ")");
-                //setAnswer(position);
+            //-------------------------------------------------------------------------------------------------------
+            // 뷰페이저 간 이동 시 프레그먼트 자동으로 새로고침 방지
+            // https://stackoverflow.com/questions/28494637/android-how-to-stop-refreshing-fragments-on-tab-change
+            //-------------------------------------------------------------------------------------------------------
+            mViewPager.setOffscreenPageLimit(mOshiMembers.size());
 
-                /*
-                Fragment fragment = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.viewpager + ":" + mViewPager.getCurrentItem());
-                if (fragment != null) {
-                    MainFragment f = (MainFragment) fragment;
-                    f.update();
-                }
-                */
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
-            }
-        });
-
-        //-------------------------------------------------------------------------------------------------------
-        // 뷰페이저 간 이동 시 프레그먼트 자동으로 새로고침 방지
-        // https://stackoverflow.com/questions/28494637/android-how-to-stop-refreshing-fragments-on-tab-change
-        //-------------------------------------------------------------------------------------------------------
-        mViewPager.setOffscreenPageLimit(mOshiMembers.size());
-
-        mSlidingTabLayout.setViewPager(mViewPager);
+            mSlidingTabLayout.setViewPager(mViewPager);
+        } else {
+            mPagerAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -258,7 +226,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
         @Override
         public Fragment getItem(int position) {
-            return MainFragment.newInstance(position); //, mOshiMembers.get(position).getBlogUrl());
+            return MainFragment.newInstance(position);
         }
 
         @Override
@@ -313,6 +281,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
         if (requestCode == Config.REQUEST_CODE && data != null) { // && resultCode == Activity.RESULT_OK) {
             boolean isDataChanged = data.getBooleanExtra("isDataChanged", false);
+
             if (isDataChanged) {
                 //--------------------------------------------------------------------------------------
                 // 이후에 onResume()이 실행되므로 mPageAdapter 값을 초기화

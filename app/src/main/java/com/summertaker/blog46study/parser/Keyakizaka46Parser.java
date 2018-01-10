@@ -76,7 +76,7 @@ public class Keyakizaka46Parser extends BaseParser {
                 continue;
             }
 
-            Log.e(mTag, name);
+            //Log.e(mTag, name);
 
             Member member = new Member();
             member.setGroupId(group.getId());

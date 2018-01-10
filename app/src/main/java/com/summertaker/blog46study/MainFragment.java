@@ -71,25 +71,12 @@ public class MainFragment extends BaseFragment {
         Bundle bundle = getArguments();
         mPosition = bundle.getInt("position", 0);
 
-        //----------------------------------------------------------
-        // mBlogUrl 을 Activity 에서 받으면 계속 같은 값이 들어온다.
-        // 새로 고침을 위해 이 곳에서 직접 값을 설정한다.
-        //----------------------------------------------------------
-        ArrayList<Member> members = BaseApplication.getInstance().getOshimembers();
-        mBlogUrl = members.get(mPosition).getBlogUrl();
-        //Log.e(mTag, "mBlogUrl: " + mBlogUrl);
-
-        //----------------------------------------------------------
-        // Activity 에서의 새로 고침 적용을 위해 초기화
-        //----------------------------------------------------------
-        //mArticles.clear();
-
         mAdapter = new MainAdapter(mContext, mArticles);
 
         mListView = rootView.findViewById(R.id.listView);
         mListView.setAdapter(mAdapter);
 
-        loadData(mBlogUrl);
+        //loadData();
 
         return rootView;
     }
@@ -110,8 +97,26 @@ public class MainFragment extends BaseFragment {
         }
     }
 
-    private void loadData(String url) {
-        String fileName = Util.getUrlToFileName(url) + ".html";
+    @Override
+    public void onResume() {
+        //Log.e(mTag, ">> onResume()...");
+
+        super.onResume();
+
+        //--------------------------------------------------------------------------------------------
+        // 앱이 최소화되거나 화면 분할 모드에 진입하면 Activity 의 Adapter 가 null 이 된다.
+        // 앱 화면이 복귀되면 onResume() 이 실행되는데 이 때 데이터를 다시 읽어와 Adapter 를 설정해 준다.
+        // 다시 읽어온 데이터를 Fragment 에도 적용하기 위해 Activity 와 똑같이 onResume() 에서 처리한다.
+        //--------------------------------------------------------------------------------------------
+        ArrayList<Member> members = BaseApplication.getInstance().getOshimembers();
+        mBlogUrl = members.get(mPosition).getBlogUrl();
+        //Log.e(mTag, "onCreateView(): "+ mPosition + " / " + mBlogUrl);
+
+        loadData();
+    }
+
+    private void loadData() {
+        String fileName = Util.getUrlToFileName(mBlogUrl) + ".html";
         //Log.e(mTag, "fileName: " + fileName);
 
         File file = new File(Config.DATA_PATH, fileName);
@@ -125,11 +130,11 @@ public class MainFragment extends BaseFragment {
                 parseData(Util.readFile(fileName));
             } else {
                 //Log.e(mTag, ">>>>> requestData()...");
-                requestData(url);
+                requestData(mBlogUrl);
             }
         } else {
             //Log.e(mTag, ">>>>> requestData()...");
-            requestData(url);
+            requestData(mBlogUrl);
         }
     }
 
@@ -202,7 +207,7 @@ public class MainFragment extends BaseFragment {
 
         mIsRefreshMode = true;
 
-        loadData(mBlogUrl);
+        loadData();
     }
 }
 
